@@ -1,4 +1,9 @@
 \documentclass{article}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\hypersetup{%
+	pdfborder = {0 0 0}
+}
 
 \title{Plinth Manual}
 \author{Tobias Brodel - Audiokinetic Experiments Lab, RMIT}
@@ -85,6 +90,11 @@
 	the AkE workstation, if you're using your own hardware or know what you're 
 	doing then any send \emph{should} work.
 
+	\subsubsection{MIDI-only Setups}
+	Some setups may restrict you to a MIDI-only situation. In this case simply 
+	make sure that \emph{Pixel Method} is set to 0 and \emph{Luminosity Method} 
+	is set to between 0 and 83 for reasons soon to be elucidated.
+
 	\subsection{Controls}
 	Now you have the MIDI set up, let's test that it does what it says on the 
 	tin.
@@ -92,7 +102,7 @@
 	\subsubsection{Pixel}
 	The \emph{Pixel} track should select a pixel to illuminate. It is triggered 
 	by sending a note between 60 and 93. Depending on what the 
-	\emph{Pixel Method} track is set to it may do nothing, make sure that that 
+	\emph{Pixel Method} track is set to it may do nothing, make sure that this 
 	track is set to 0.
 
 	\subsubsection{Routine}
@@ -120,7 +130,7 @@
 
 	\subsubsection{Luminosity Method}
 	Much like the above channel, this signal controls the way luminosity is 
-	manipulated. 0-42 uses the \emph{Luminosity} track, 43-84 uses velocity 
+	manipulated. 0-42 uses the \emph{Luminosity} track, 43-83 uses velocity 
 	data from the \emph{Pixel} track and 84-127 uses audio amplitude data. 
 	Communicates on channel 5, parameter 6.
 
@@ -215,6 +225,7 @@
 	Like previous two routines but split into quarters. See \emph{Tetrad.} 
 	Luminosity variable. Unaffected by \emph{Delay.}
 
+
 	\subsection{Routine 14: Outsider}
 	All LEDs illuminated at one eighth of given luminosity. Colour set by 
 	default at \emph{Pixel}. Another LED chosen at random is set to 
@@ -228,4 +239,52 @@
 	\subsection{Routine 16: Outsider Tetrad}
 	Like previous two routines but with three random pixels. See \emph{Tetrad.} 
 	Luminosity variable. Affected by \emph{Delay} (experimental).
+
+	\section{Coding}
+	The sources to all of the software running the plinth are available at 
+	\url{https://github.com/TobyJamesJoy/ake-plinth}. There are three main 
+	elements to the code, the Arduino sketch, the PD patches and this manual. 
+	Currently work is underway to build a virtual model of the plinth in the 
+	Unity game engine so students can develop works offsite. Everything is BSD 
+	licensed, feel free to check out the code, patches are welcome.
+
+	\subsection{Arduino}
+	The Arduino code is written in Kernel Normal Form (KNF, see 
+	\url{http://www.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man9/style.9}).
+	This is an attempt to keep the code conformant to an ANSI-C style. I want 
+	to avoid C++isms so as to make everything portable. In the future we may 
+	choose to move away from Arduino to for instance plain C running on an 
+	Atmel chip or something like a Raspberry Pi. Also KNF is the only sane 
+	coding style ever. The code links to ``LPD8806.h", found at 
+	\url{https://github.com/adafruit/LPD8806} and ``SPI.H" that ships with the 
+	Arduino IDE.
+
+	\subsection{Pure Data}
+	The PD component of this comprises of two patches, ``daw\_ctl.pd" and 
+	``arduino.pd", they do pretty much what it says on the tin. ``daw\_ctl.pd" 
+	accepts the MIDI, CC and audio signals from the workstation's DAW and 
+	parses them. The results are then handed to ``arduino.pd" in the form of 
+	four sends: ``rout", ``pix", ``lum" and ``del". ``arduino.pd" parses this 
+	data again and communicates it via serial bus to Arduino to generate the 
+	routines.
+	
+	If you're hacking on this at home please be mindful that the plinth runs 
+	vanilla PD from the Debian repos, this again is for portability's sake. In 
+	the future we'll probably having this running from a low-cost SoC, for 
+	which there probably won't be pd-extended binaries. As a result many 
+	objects rely on the maxlib, cyclone and comport externals. If you're 
+	testing on Debian install everything like so:
+	\begin{verbatim}
+	apt-get install puredata pd-comport pd-cyclone pd-maxlib
+	\end{verbatim}
+	I find it's good practice to know which objects are from vanilla and which 
+	are external so I don't start PD with any -lib flags. As such you'll need 
+	to specify the library name when declaring new objects (e.g. 
+	``cyclone/drunk" and ``maxlib/scale").
+
+	\subsection{Manual}
+	The source for this manual too is available on github, it's written in 
+	\LaTeX using the texlive package from the Debian repos. If any of this 
+	could be clearer or if you think I've left something out, please send me a 
+	patch!
 \end{document}
