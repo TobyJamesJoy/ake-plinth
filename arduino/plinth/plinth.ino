@@ -69,13 +69,13 @@ loop() {
                 
                 width = Serial.parseInt(); //width
                 Serial.write(width);
+                width = get_width(width);
                 
                 switch (rout) {
                 case OFF:
                         off();
                         break;
                 case MONO:
-                        off();
                         mono(pix, lum, width);
                         strip.show();
                         break;
@@ -119,8 +119,12 @@ def_palette(unsigned palette[COLOURS])
 unsigned
 get_width(unsigned width)
 {
-        double unit = NUM_LEDS / MIDI_MAX;
-        return (unsigned)(unit * width);
+        double unit = (double)NUM_LEDS / (double)MIDI_MAX;
+        width = (unsigned)(unit * width);
+        if (width > 0)
+                return width;
+        else
+                return 1;
 }
 
 void
@@ -135,13 +139,11 @@ off(void)
 void
 set_clr(int pix, unsigned clr[CHANNELS])
 {
-        pix = check_pix(pix);
         strip.setPixelColor(pix, strip.Color(clr[RED], clr[GREEN], clr[BLUE]));
 }
 
 void get_clr(int pix, unsigned lum, unsigned clr[CHANNELS])
 {          
-        pix = check_pix(pix);
   
         if (pix < palette[O]) {
                 clr[RED] = lum;
@@ -183,7 +185,8 @@ void
 mk_pix(int pix, unsigned lum)
 {
         unsigned clr[CHANNELS] = {OFF, OFF, OFF};
-        
+ 
+        pix = check_pix(pix);       
         get_clr(pix, lum, clr);
         set_clr(pix, clr);        
 }
@@ -191,13 +194,13 @@ mk_pix(int pix, unsigned lum)
 void
 mono(int pix, unsigned lum, unsigned width)
 {
-        unsigned cnt;
+        int cnt;
         unsigned clr[CHANNELS] = {OFF, OFF, OFF};
         
         get_clr(pix, lum, clr);
-        width = get_width(width);
         
-        for (cnt = pix; cnt < (pix + width); ++cnt) {
+        off();
+        for (cnt = 0; cnt < width; ++cnt, ++pix) {
                 set_clr(pix, clr);
         }
 }
@@ -207,7 +210,8 @@ spectrum(int pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         
-        for (cnt = pix; cnt < NUM_LEDS; ++cnt)
+        off();
+        for (cnt = pix; cnt < (pix + width); ++cnt)
                 mk_pix(cnt, lum);
         strip.show();
 }
@@ -218,19 +222,17 @@ spectrum_double_chase(int pix, unsigned lum, unsigned width)
         unsigned cnt;
         int pix1, pix2;
         
-        pix1 = (int)pix;
+        
+        pix1 = pix;
         pix2 = pix1;
 
-        for (cnt = 0; cnt < NUM_LEDS; ++cnt)
-                strip.setPixelColor(cnt, OFF);
+        off();
         
-        for (cnt = 0; cnt < NUM_LEDS / 2; ++cnt, ++pix1, --pix2) {
-                pix1 = check_pix(pix1);
-                pix2 = check_pix(pix2);
+        for (cnt = 0; cnt < width / 2; ++cnt, ++pix1, --pix2) {
                 mk_pix(pix1, lum);
                 mk_pix(pix2, lum);
-                strip.show();
         }
+        strip.show();
 }
 
 int
@@ -244,12 +246,12 @@ diad(int pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         int di = pix + NUM_LEDS / 2;
-        
-        di = check_pix(di);
 
-        off();      
-        mk_pix(pix, lum);
-        mk_pix(di, lum);
+        off();
+        for (cnt = 0; cnt < width / 2; ++cnt, ++pix, ++ di) {
+                mk_pix(pix, lum);
+                mk_pix(di, lum);
+        }
         strip.show();
 }
 
@@ -280,7 +282,6 @@ triad(int pix, unsigned lum, unsigned width)
 void
 tetrad(int pix, unsigned lum, unsigned width)
 {
-        int pint = int pix;
         unsigned cnt;
 
         for (cnt = 0; cnt < NUM_LEDS; ++cnt)
@@ -288,17 +289,17 @@ tetrad(int pix, unsigned lum, unsigned width)
         
         mk_pix(pix, lum);
         
-        pint += (NUM_LEDS / 4);
-        pint = check_pix(pint);
-        mk_pix(pint, lum);
+        pix += (NUM_LEDS / 4);
+        pix = check_pix(pix);
+        mk_pix(pix, lum);
         
-        pint += (NUM_LEDS / 2);
-        pint = check_pix(pint);
-        mk_pix(pint, lum);
+        pix += (NUM_LEDS / 2);
+        pix = check_pix(pix);
+        mk_pix(pix, lum);
         
-        pint -= (NUM_LEDS / 4);
-        pint = check_pix(pint);
-        mk_pix(pint, lum);
+        pix -= (NUM_LEDS / 4);
+        pix = check_pix(pix);
+        mk_pix(pix, lum);
         
         strip.show();
 }
@@ -310,7 +311,7 @@ outsider(int pix, unsigned lum, unsigned width)
           unsigned in_clr[CHANNELS] = {OFF, OFF, OFF};
           unsigned out_clr[CHANNELS] = {OFF, OFF, OFF};
           
-          set_mono(pix, lum / 8, in_clr);
+          mono(pix, lum / 8, MIDI_MAX);
           
           out = check_pix(pix + NUM_LEDS / 2);
           get_clr(out, lum, out_clr);
@@ -329,7 +330,7 @@ outsider_triad(int pix, unsigned lum, unsigned width)
           unsigned out_clr0[CHANNELS] = {OFF, OFF, OFF};
           unsigned out_clr1[CHANNELS] = {OFF, OFF, OFF};
           
-          set_mono(pix, lum / 8, in_clr);
+          mono(pix, lum / 8, MIDI_MAX);
           
           out0 = check_pix(pix + (NUM_LEDS / 3));
           get_clr(out0, lum, out_clr0);
@@ -359,7 +360,7 @@ outsider_tetrad(unsigned pix, unsigned lum, unsigned width)
           unsigned out_clr2[CHANNELS] = {OFF, OFF, OFF};
           
           
-          set_mono(pix, lum / 8, in_clr);
+          mono(pix, lum / 8, MIDI_MAX);
           
           out0 = pix + (NUM_LEDS / 4);
           out0 = check_pix(out0);
