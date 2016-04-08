@@ -23,10 +23,8 @@ enum channels {
 };
 
 enum routines {
-        OFFF, SINGLE, SPECTRUM, SPECTRUM_CHASE, DOUBLE_SPECTRUM,
-        DIAD, TRIAD, TRIAD_CHASE, TETRAD, SKINNY_TETRAD,
-        MONO_STRIP, HEMISPHERE, TRISECT, QUADRANT,
-        OUTSIDER, OUTSIDER_TRIAD, OUTSIDER_TETRAD
+        OFFF, SINGLE, SPECTRUM, DOUBLE_SPECTRUM, DIAD, TRIAD, TETRAD, 
+        MONO_STRIP, OUTSIDER, OUTSIDER_TRIAD, OUTSIDER_TETRAD
 };
 
 void 
@@ -46,7 +44,7 @@ setup()
         
 void 
 loop() {
-        unsigned rout, pix, lum, del;
+        unsigned rout, pix, lum, width;
 
         while (Serial.available() > OFF) {
                 /* 
@@ -63,8 +61,8 @@ loop() {
                 Serial.write(pix);
                 
                 
-                del = Serial.parseInt(); //delay
-                Serial.write(del);
+                width = Serial.parseInt(); //width
+                Serial.write(width);
                 
                 switch (rout) {
                 case OFF:
@@ -76,49 +74,31 @@ loop() {
                         strip.show();
                         break;
                 case SPECTRUM:
-                        spectrum(pix, lum, del);
-                        break;
-                case SPECTRUM_CHASE:
-                        spectrum_chase(pix, lum, del);
+                        spectrum(pix, lum, width);
                         break;
                 case DOUBLE_SPECTRUM:
-                        spectrum_double_chase(pix, lum, del);
+                        spectrum_double_chase(pix, lum, width);
                         break;
                 case DIAD:
-                        diad(pix, lum, del);
+                        diad(pix, lum, width);
                         break;
                 case TRIAD:
-                        triad(pix, lum, del);
-                        break;
-                case TRIAD_CHASE:
-                        triad_chase(pix, lum, del);
+                        triad(pix, lum, width);
                         break;
                 case TETRAD:
-                        tetrad(pix, lum, del);
-                        break;
-                case SKINNY_TETRAD:
-                        skinny_tetrad(pix, lum, del);
+                        tetrad(pix, lum, width);
                         break;
                 case MONO_STRIP:
-                        mono_strip(pix, lum, del);
-                        break;
-                case HEMISPHERE:
-                        hemisphere(pix, lum, del);
-                        break;
-                case TRISECT:
-                        trisect(pix, lum, del);
-                        break;
-                case QUADRANT:
-                        quadrant(pix, lum, del);
+                        mono_strip(pix, lum, width);
                         break;
                 case OUTSIDER:
-                        outsider(pix, lum, del);
+                        outsider(pix, lum, width);
                         break;
                 case OUTSIDER_TRIAD:
-                        outsider_triad(pix, lum, del);
+                        outsider_triad(pix, lum, width);
                         break;
                 case OUTSIDER_TETRAD:
-                        outsider_tetrad(pix, lum, del);
+                        outsider_tetrad(pix, lum, width);
                 }
 
         }
@@ -132,6 +112,7 @@ off(void)
       for (cnt = 0; cnt < NUM_LEDS; ++cnt)
               strip.setPixelColor(cnt, OFF);
 }
+
 void
 set_clr(unsigned pix, unsigned clr[CHANNELS])
 {
@@ -222,7 +203,7 @@ mk_pix(unsigned pix, unsigned lum)
 }
 
 void
-spectrum(unsigned pix, unsigned lum, unsigned del) 
+spectrum(unsigned pix, unsigned lum, unsigned width) 
 {
         unsigned cnt;
         
@@ -232,23 +213,7 @@ spectrum(unsigned pix, unsigned lum, unsigned del)
 }
 
 void
-spectrum_chase(unsigned pix, unsigned lum, unsigned del) 
-{
-        unsigned cnt;
-        int pix1 = (int)pix;
-        
-        for (cnt = 0; cnt < NUM_LEDS; ++cnt)
-                strip.setPixelColor(cnt, OFF);
-  
-        for (cnt = 0; cnt < NUM_LEDS; ++cnt, ++pix1) {
-                pix1 = check_pix(pix1);
-                mk_pix(pix1, lum);
-                strip.show();
-        }     
-}
-
-void
-spectrum_double_chase(unsigned pix, unsigned lum, unsigned del)
+spectrum_double_chase(unsigned pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         int pix1, pix2;
@@ -280,7 +245,7 @@ check_pix(int pix)
 }
 
 void
-diad(unsigned pix, unsigned lum, unsigned del)
+diad(unsigned pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         int di = pix + NUM_LEDS / 2;
@@ -294,7 +259,7 @@ diad(unsigned pix, unsigned lum, unsigned del)
 }
 
 void 
-mk_triad(unsigned pix, unsigned lum, unsigned del, unsigned offset) 
+mk_triad(unsigned pix, unsigned lum, unsigned width, unsigned offset) 
 {
         int pint = (int)pix;
 
@@ -307,30 +272,18 @@ mk_triad(unsigned pix, unsigned lum, unsigned del, unsigned offset)
 }
 
 void
-triad(unsigned pix, unsigned lum, unsigned del)
+triad(unsigned pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         
         for (cnt = 0; cnt < NUM_LEDS; ++cnt)
                 strip.setPixelColor(cnt, OFF);        
 
-        mk_triad(pix, lum, del, NUM_LEDS / 3);
+        mk_triad(pix, lum, width, NUM_LEDS / 3);
 }
 
 void
-triad_chase(unsigned pix, unsigned lum, unsigned del)
-{
-        unsigned cnt;
-        
-        for (cnt = 0; cnt < NUM_LEDS; ++cnt)
-                strip.setPixelColor(cnt, OFF);        
-
-        for (cnt = 1; cnt <= NUM_LEDS / 2; ++cnt)
-                mk_triad(pix, lum, del, cnt);
-}
-
-void
-tetrad(unsigned pix, unsigned lum, unsigned del)
+tetrad(unsigned pix, unsigned lum, unsigned width)
 {
         int pint = (int)pix;
         unsigned cnt;
@@ -356,32 +309,6 @@ tetrad(unsigned pix, unsigned lum, unsigned del)
 }
 
 void
-skinny_tetrad(unsigned pix, unsigned lum, unsigned del)
-{
-        int pint = (int)pix;
-        unsigned cnt;
-
-        for (cnt = 0; cnt < NUM_LEDS; ++cnt)
-                strip.setPixelColor(cnt, OFF);        
-        
-        mk_pix(pix, lum);
-        
-        pint += (NUM_LEDS / 6);
-        pint = check_pix(pint);
-        mk_pix(pint, lum);
-        
-        pint += (NUM_LEDS / 2);
-        pint = check_pix(pint);
-        mk_pix(pint, lum);
-        
-        pint -= (NUM_LEDS / 6);
-        pint = check_pix(pint);
-        mk_pix(pint, lum);
-        
-        strip.show();
-}
-
-void
 set_mono(unsigned pix, unsigned lum, unsigned clr[CHANNELS])
 {
         unsigned cnt;
@@ -393,7 +320,7 @@ set_mono(unsigned pix, unsigned lum, unsigned clr[CHANNELS])
 }
 
 void
-mono_strip(unsigned pix, unsigned lum, unsigned del)
+mono_strip(unsigned pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         unsigned clr[CHANNELS] = {OFF, OFF, OFF};
@@ -403,120 +330,7 @@ mono_strip(unsigned pix, unsigned lum, unsigned del)
 }
 
 void
-hemisphere(unsigned pix, unsigned lum, unsigned del)
-{
-          int p;
-          unsigned cnt;
-          unsigned clr[CHANNELS] = {OFF, OFF, OFF};
-
-          get_clr(pix, lum, clr);
-          p = pix;
-          for (cnt = 0; cnt < NUM_LEDS / 2; ++cnt, ++p) {
-                  p = check_pix(p);
-                  strip.setPixelColor(p, clr[RED], clr[GREEN], clr[BLUE]);
-          }
-          
-          for (cnt = 0; cnt < CHANNELS; ++cnt)
-                  clr[cnt] = OFF;
-          p = (pix + NUM_LEDS / 2);
-          p = check_pix(p);
-          get_clr(p, lum, clr);
-          for (cnt = 0; cnt < NUM_LEDS / 2; ++cnt, ++p) {
-                  p = check_pix(p);
-                  strip.setPixelColor(p, clr[RED], clr[GREEN], clr[BLUE]);
-          }
-          
-          strip.show();
-}
-
-void
-trisect(unsigned pix, unsigned lum, unsigned del)
-{
-          int p;
-          unsigned cnt;
-          unsigned clr[CHANNELS] = {OFF, OFF, OFF};
-
-          get_clr(pix, lum, clr);
-          p = pix;
-          for (cnt = 0; cnt < NUM_LEDS / 3; ++cnt, ++p) {
-                  p = check_pix(p);
-                  strip.setPixelColor(p, clr[RED], clr[GREEN], clr[BLUE]);
-          }
-          
-          for (cnt = 0; cnt < CHANNELS; ++cnt)
-                  clr[cnt] = OFF;
-          p = (pix + NUM_LEDS / 3);
-          p = check_pix(p);
-          get_clr(p, lum, clr);
-          for (cnt = 0; cnt < NUM_LEDS / 3; ++cnt, ++p) {
-                  p = check_pix(p);
-                  strip.setPixelColor(p, clr[RED], clr[GREEN], clr[BLUE]);
-          }
-          
-          
-          for (cnt = 0; cnt < CHANNELS; ++cnt)
-                  clr[cnt] = OFF;
-          p = (pix - NUM_LEDS / 3);
-          p = check_pix(p);
-          get_clr(p, lum, clr);
-          for (cnt = 0; cnt < NUM_LEDS / 3; ++cnt, ++p) {
-                  p = check_pix(p);
-                  strip.setPixelColor(p, clr[RED], clr[GREEN], clr[BLUE]);
-          }
-          
-          strip.show();
-}
-
-void
-quadrant(unsigned pix, unsigned lum, unsigned del)
-{
-          int p;
-          unsigned cnt;
-          unsigned clr[CHANNELS] = {OFF, OFF, OFF};
-
-          get_clr(pix, lum, clr);
-          p = pix;
-          for (cnt = 0; cnt < NUM_LEDS / 4; ++cnt, ++p) {
-                  p = check_pix(p);
-                  strip.setPixelColor(p, clr[RED], clr[GREEN], clr[BLUE]);
-          }
-          
-          for (cnt = 0; cnt < CHANNELS; ++cnt)
-                  clr[cnt] = OFF;
-          p = pix + (NUM_LEDS / 4);
-          p = check_pix(p);
-          get_clr(p, lum, clr);
-          for (cnt = 0; cnt < NUM_LEDS / 4; ++cnt, ++p) {
-                  p = check_pix(p);
-                  strip.setPixelColor(p, clr[RED], clr[GREEN], clr[BLUE]);
-          }
-          
-          
-          for (cnt = 0; cnt < CHANNELS; ++cnt)
-                  clr[cnt] = OFF;
-          p = pix +  (NUM_LEDS / 2);       
-          p = check_pix(p);
-          get_clr(p, lum, clr);
-          for (cnt = 0; cnt < NUM_LEDS / 4; ++cnt, ++p) {
-                  p = check_pix(p);
-                  strip.setPixelColor(p, clr[RED], clr[GREEN], clr[BLUE]);
-          }
-          
-          for (cnt = 0; cnt < CHANNELS; ++cnt)
-                  clr[cnt] = OFF;
-          p = (pix - NUM_LEDS / 4);
-          p = check_pix(p);
-          get_clr(p, lum, clr);
-          for (cnt = 0; cnt < NUM_LEDS / 4; ++cnt, ++p) {
-                  p = check_pix(p);
-                  strip.setPixelColor(p, clr[RED], clr[GREEN], clr[BLUE]);
-          }
-          
-          strip.show();
-}
-
-void
-outsider(unsigned pix, unsigned lum, unsigned del)
+outsider(unsigned pix, unsigned lum, unsigned width)
 {
           unsigned cnt, out;
           unsigned in_clr[CHANNELS] = {OFF, OFF, OFF};
@@ -535,7 +349,7 @@ outsider(unsigned pix, unsigned lum, unsigned del)
 }
 
 void
-outsider_triad(unsigned pix, unsigned lum, unsigned del)
+outsider_triad(unsigned pix, unsigned lum, unsigned width)
 {
           int out0, out1;
           unsigned cnt;
@@ -567,7 +381,7 @@ outsider_triad(unsigned pix, unsigned lum, unsigned del)
 }
 
 void
-outsider_tetrad(unsigned pix, unsigned lum, unsigned del)
+outsider_tetrad(unsigned pix, unsigned lum, unsigned width)
 {
           int out0, out1, out2;
           unsigned cnt;
