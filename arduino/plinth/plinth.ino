@@ -5,6 +5,7 @@
 #define BAUD_RATE 115200
 #define CHANNELS 3
 #define CLOCKPIN 3
+#define COLOURS 12
 #define DATAPIN 2
 #define NUM_LEDS 34
 #define OFF 0
@@ -14,8 +15,7 @@
 LPD8806 strip = LPD8806(NUM_LEDS, DATAPIN, CLOCKPIN);
 
 enum colours {
-        R, O = 3, Y = 6, CH = 9, G = 12, GC = 15, 
-        C = 18, BC = 21, B = 24, V = 27, M = 30, RM = 33
+        R, O, Y, CH, G, GC, C, BC, B, V, M, RM
 };
 
 enum channels {
@@ -26,6 +26,8 @@ enum routines {
         OFFF, SINGLE, SPECTRUM, DOUBLE_SPECTRUM, DIAD, TRIAD, TETRAD, 
         MONO_STRIP, OUTSIDER, OUTSIDER_TRIAD, OUTSIDER_TETRAD
 };
+
+unsigned palette[COLOURS];
 
 void 
 setup() 
@@ -40,6 +42,8 @@ setup()
         // opens serial port, sets data rate to 9600 bps
         Serial.begin(BAUD_RATE);
         Serial.setTimeout(TIMEOUT);
+
+        def_palette(palette);
 }
         
 void 
@@ -105,6 +109,15 @@ loop() {
 }
 
 void
+def_palette(unsigned palette[COLOURS])
+{
+        unsigned i;
+        for (i = 1; i < COLOURS; ++i) 
+	        palette[i] = (NUM_LEDS / COLOURS) * i;
+        palette[0] = 0;
+}
+
+void
 off(void)
 {
       unsigned cnt;
@@ -121,73 +134,37 @@ set_clr(unsigned pix, unsigned clr[CHANNELS])
 
 void get_clr(unsigned pix, unsigned lum, unsigned clr[CHANNELS])
 {          
-          switch (pix) {
-          case R:
-          case R + 1:
-          case R + 2:
+          if (pix < palette[O]) {
                   clr[RED] = lum;
-                  break;
-          case O:
-          case O + 1:
-          case O + 2:
+          } else if (pix < palette[Y]) {
                   clr[RED] = lum;
                   clr[GREEN] = lum / 2;
-                  break;
-          case Y:
-          case Y + 1:
-          case Y + 2:
+          } else if (pix < palette[CH]) {
                   clr[RED] = lum;
                   clr[GREEN] = lum;
-                  break;
-          case CH:
-          case CH + 1:
-          case CH + 2:
+          } else if (pix < palette[G]) {
                   clr[RED] = lum / 2;
                   clr[GREEN] = lum;
-                  break;
-          case G:
-          case G + 1:
-          case G + 2:
+          } else if (pix < palette[GC]) {
                   clr[GREEN] = lum;
-                  break;
-          case GC:
-          case GC + 1:
-          case GC + 2:
+          } else if (pix < palette[C]) {
                   clr[GREEN] = lum;
                   clr[BLUE] = lum / 2;
-                  break;
-          case C:
-          case C + 1:
-          case C + 2:
+          } else if (pix < palette[BC]) {
                   clr[GREEN] = lum;
                   clr[BLUE] = lum;
-                  break;
-          case BC:
-          case BC + 1:
-          case BC + 2:
+          } else if (pix < palette[B]) {
                   clr[GREEN] = lum / 2;
                   clr[BLUE] = lum;
-                  break;
-          case B:
-          case B + 1:
-          case B + 2:
+          } else if (pix < palette[V]) {
                   clr[BLUE] = lum;
-                  break;
-          case V:
-          case V + 1:
-          case V + 2:
+          } else if (pix < palette[M]) {
                   clr[RED] = lum / 2;
                   clr[BLUE] = lum;
-                  break;
-          case M:
-          case M + 1:
-          case M + 2:
+          } else if (pix < palette[RM]) {
                   clr[RED] = lum;
                   clr[BLUE] = lum;
-                  break;
-          case RM:
-          case RM + 1:
-          case RM + 2:
+          } else {
                   clr[RED] = lum;
                   clr[BLUE] = lum / 2;
           }
