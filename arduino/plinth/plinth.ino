@@ -49,7 +49,8 @@ setup()
         
 void 
 loop() {
-        unsigned rout, pix, lum, width;
+        unsigned rout, lum, width;
+        int pix;
 
         while (Serial.available() > OFF) {
                 /* 
@@ -132,51 +133,54 @@ off(void)
 }
 
 void
-set_clr(unsigned pix, unsigned clr[CHANNELS])
+set_clr(int pix, unsigned clr[CHANNELS])
 {
+        pix = check_pix(pix);
         strip.setPixelColor(pix, strip.Color(clr[RED], clr[GREEN], clr[BLUE]));
 }
 
-void get_clr(unsigned pix, unsigned lum, unsigned clr[CHANNELS])
+void get_clr(int pix, unsigned lum, unsigned clr[CHANNELS])
 {          
-          if (pix < palette[O]) {
-                  clr[RED] = lum;
-          } else if (pix < palette[Y]) {
-                  clr[RED] = lum;
-                  clr[GREEN] = lum / 2;
-          } else if (pix < palette[CH]) {
-                  clr[RED] = lum;
-                  clr[GREEN] = lum;
-          } else if (pix < palette[G]) {
-                  clr[RED] = lum / 2;
-                  clr[GREEN] = lum;
-          } else if (pix < palette[GC]) {
-                  clr[GREEN] = lum;
-          } else if (pix < palette[C]) {
-                  clr[GREEN] = lum;
-                  clr[BLUE] = lum / 2;
-          } else if (pix < palette[BC]) {
-                  clr[GREEN] = lum;
-                  clr[BLUE] = lum;
-          } else if (pix < palette[B]) {
-                  clr[GREEN] = lum / 2;
-                  clr[BLUE] = lum;
-          } else if (pix < palette[V]) {
-                  clr[BLUE] = lum;
-          } else if (pix < palette[M]) {
-                  clr[RED] = lum / 2;
-                  clr[BLUE] = lum;
-          } else if (pix < palette[RM]) {
-                  clr[RED] = lum;
-                  clr[BLUE] = lum;
-          } else {
-                  clr[RED] = lum;
-                  clr[BLUE] = lum / 2;
-          }
+        pix = check_pix(pix);
+  
+        if (pix < palette[O]) {
+                clr[RED] = lum;
+        } else if (pix < palette[Y]) {
+                clr[RED] = lum;
+                clr[GREEN] = lum / 2;
+        } else if (pix < palette[CH]) {
+                clr[RED] = lum;
+                clr[GREEN] = lum;
+        } else if (pix < palette[G]) {
+                clr[RED] = lum / 2;
+                clr[GREEN] = lum;
+        } else if (pix < palette[GC]) {
+                clr[GREEN] = lum;
+        } else if (pix < palette[C]) {
+                clr[GREEN] = lum;
+                clr[BLUE] = lum / 2;
+        } else if (pix < palette[BC]) {
+                clr[GREEN] = lum;
+                clr[BLUE] = lum;
+        } else if (pix < palette[B]) {
+                clr[GREEN] = lum / 2;
+                clr[BLUE] = lum;
+        } else if (pix < palette[V]) {
+                clr[BLUE] = lum;
+        } else if (pix < palette[M]) {
+                clr[RED] = lum / 2;
+                clr[BLUE] = lum;
+        } else if (pix < palette[RM]) {
+                clr[RED] = lum;
+                clr[BLUE] = lum;
+        } else {
+                clr[RED] = lum;
+                clr[BLUE] = lum / 2;
+        }
 }
 
 void
-mk_pix(unsigned pix, unsigned lum)
+mk_pix(int pix, unsigned lum)
 {
         unsigned clr[CHANNELS] = {OFF, OFF, OFF};
         
@@ -185,7 +189,7 @@ mk_pix(unsigned pix, unsigned lum)
 }
 
 void
-mono(unsigned pix, unsigned lum, unsigned width)
+mono(int pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         unsigned clr[CHANNELS] = {OFF, OFF, OFF};
@@ -199,7 +203,7 @@ mono(unsigned pix, unsigned lum, unsigned width)
 }
 
 void
-spectrum(unsigned pix, unsigned lum, unsigned width) 
+spectrum(int pix, unsigned lum, unsigned width) 
 {
         unsigned cnt;
         
@@ -209,7 +213,7 @@ spectrum(unsigned pix, unsigned lum, unsigned width)
 }
 
 void
-spectrum_double_chase(unsigned pix, unsigned lum, unsigned width)
+spectrum_double_chase(int pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         int pix1, pix2;
@@ -232,16 +236,11 @@ spectrum_double_chase(unsigned pix, unsigned lum, unsigned width)
 int
 check_pix(int pix)
 {
-        if (pix > NUM_LEDS)
-                pix -= NUM_LEDS;
-        else if (pix < 0)
-                pix += NUM_LEDS;
-
-        return pix;
+        return pix % NUM_LEDS;
 }
 
 void
-diad(unsigned pix, unsigned lum, unsigned width)
+diad(int pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         int di = pix + NUM_LEDS / 2;
@@ -255,20 +254,20 @@ diad(unsigned pix, unsigned lum, unsigned width)
 }
 
 void 
-mk_triad(unsigned pix, unsigned lum, unsigned width, unsigned offset) 
+mk_triad(int pix, unsigned lum, unsigned width, unsigned offset) 
 {
-        int pint = (int)pix;
+        int pint = pix;
 
         mk_pix(pix, lum);
         pint = check_pix(pint + offset);
         mk_pix(pint, lum);
-        pint = check_pix((int)pix - offset);
+        pint = check_pix(pix - offset);
         mk_pix(pint, lum);
         strip.show();
 }
 
 void
-triad(unsigned pix, unsigned lum, unsigned width)
+triad(int pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         
@@ -279,9 +278,9 @@ triad(unsigned pix, unsigned lum, unsigned width)
 }
 
 void
-tetrad(unsigned pix, unsigned lum, unsigned width)
+tetrad(int pix, unsigned lum, unsigned width)
 {
-        int pint = (int)pix;
+        int pint = int pix;
         unsigned cnt;
 
         for (cnt = 0; cnt < NUM_LEDS; ++cnt)
@@ -305,28 +304,7 @@ tetrad(unsigned pix, unsigned lum, unsigned width)
 }
 
 void
-set_mono(unsigned pix, unsigned lum, unsigned clr[CHANNELS])
-{
-        unsigned cnt;
-        
-        get_clr(pix, lum, clr);
-        
-        for (cnt = 0; cnt < NUM_LEDS; ++cnt)
-                strip.setPixelColor(cnt, clr[RED], clr[GREEN], clr[BLUE]);
-}
-
-void
-mono_strip(unsigned pix, unsigned lum, unsigned width)
-{
-        unsigned cnt;
-        unsigned clr[CHANNELS] = {OFF, OFF, OFF};
-        
-        set_mono(pix, lum, clr);
-        strip.show();
-}
-
-void
-outsider(unsigned pix, unsigned lum, unsigned width)
+outsider(int pix, unsigned lum, unsigned width)
 {
           unsigned cnt, out;
           unsigned in_clr[CHANNELS] = {OFF, OFF, OFF};
@@ -334,9 +312,7 @@ outsider(unsigned pix, unsigned lum, unsigned width)
           
           set_mono(pix, lum / 8, in_clr);
           
-          out = pix + NUM_LEDS / 2;
-          if (out >= NUM_LEDS)
-                  out -= NUM_LEDS;
+          out = check_pix(pix + NUM_LEDS / 2);
           get_clr(out, lum, out_clr);
                     
           out = random(NUM_LEDS);
@@ -345,7 +321,7 @@ outsider(unsigned pix, unsigned lum, unsigned width)
 }
 
 void
-outsider_triad(unsigned pix, unsigned lum, unsigned width)
+outsider_triad(int pix, unsigned lum, unsigned width)
 {
           int out0, out1;
           unsigned cnt;
@@ -355,14 +331,10 @@ outsider_triad(unsigned pix, unsigned lum, unsigned width)
           
           set_mono(pix, lum / 8, in_clr);
           
-          out0 = pix + (NUM_LEDS / 3);
-          if (out0 >= NUM_LEDS)
-                  out0 -= NUM_LEDS;
+          out0 = check_pix(pix + (NUM_LEDS / 3));
           get_clr(out0, lum, out_clr0);
           
-          out1 = pix - (NUM_LEDS / 3);
-          if (out1 < 0)
-                  out1 += NUM_LEDS;
+          out1 = check_pix(pix - (NUM_LEDS / 3));
           get_clr(out1, lum, out_clr1);
           
           out0 = random(NUM_LEDS);
