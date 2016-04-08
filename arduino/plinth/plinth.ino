@@ -7,6 +7,7 @@
 #define CLOCKPIN 3
 #define COLOURS 12
 #define DATAPIN 2
+#define MIDI_MAX 127
 #define NUM_LEDS 34
 #define OFF 0
 #define OUTPIN 13
@@ -23,8 +24,8 @@ enum channels {
 };
 
 enum routines {
-        OFFF, SINGLE, SPECTRUM, DOUBLE_SPECTRUM, DIAD, TRIAD, TETRAD, 
-        MONO_STRIP, OUTSIDER, OUTSIDER_TRIAD, OUTSIDER_TETRAD
+        OFFF, MONO, SPECTRUM, DOUBLE_SPECTRUM, DIAD, TRIAD, TETRAD, 
+        OUTSIDER, OUTSIDER_TRIAD, OUTSIDER_TETRAD
 };
 
 unsigned palette[COLOURS];
@@ -72,9 +73,9 @@ loop() {
                 case OFF:
                         off();
                         break;
-                case SINGLE:
+                case MONO:
                         off();
-                        mk_pix(pix, lum);
+                        mono(pix, lum, width);
                         strip.show();
                         break;
                 case SPECTRUM:
@@ -91,9 +92,6 @@ loop() {
                         break;
                 case TETRAD:
                         tetrad(pix, lum, width);
-                        break;
-                case MONO_STRIP:
-                        mono_strip(pix, lum, width);
                         break;
                 case OUTSIDER:
                         outsider(pix, lum, width);
@@ -115,6 +113,13 @@ def_palette(unsigned palette[COLOURS])
         for (i = 1; i < COLOURS; ++i) 
 	        palette[i] = (NUM_LEDS / COLOURS) * i;
         palette[0] = 0;
+}
+
+unsigned
+get_width(unsigned width)
+{
+        double unit = NUM_LEDS / MIDI_MAX;
+        return (unsigned)(unit * width);
 }
 
 void
@@ -177,6 +182,20 @@ mk_pix(unsigned pix, unsigned lum)
         
         get_clr(pix, lum, clr);
         set_clr(pix, clr);        
+}
+
+void
+mono(unsigned pix, unsigned lum, unsigned width)
+{
+        unsigned cnt;
+        unsigned clr[CHANNELS] = {OFF, OFF, OFF};
+        
+        get_clr(pix, lum, clr);
+        width = get_width(width);
+        
+        for (cnt = pix; cnt < (pix + width); ++cnt) {
+                set_clr(pix, clr);
+        }
 }
 
 void
