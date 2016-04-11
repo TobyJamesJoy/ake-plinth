@@ -24,7 +24,7 @@ enum channels {
 };
 
 enum routines {
-        OFFF, MONO, SPECTRUM, DOUBLE_SPECTRUM, DIAD, TRIAD, TETRAD, 
+        OFFF, MONO, SPECTRUM, DIAD, TRIAD, TETRAD, 
         OUTSIDER, OUTSIDER_TRIAD, OUTSIDER_TETRAD
 };
 
@@ -81,9 +81,6 @@ loop() {
                         break;
                 case SPECTRUM:
                         spectrum(pix, lum, width);
-                        break;
-                case DOUBLE_SPECTRUM:
-                        spectrum_double_chase(pix, lum, width);
                         break;
                 case DIAD:
                         diad(pix, lum, width);
@@ -200,25 +197,20 @@ mono(int pix, unsigned lum, unsigned width)
         
         get_clr(pix, lum, clr);
         
+        pix = check_pix(pix);
+        set_clr(pix, clr);
+        
         off();
-        for (cnt = 0; cnt < width / 2; ++cnt, ++pix, --pix1) {
+        for (cnt = 0; cnt <= width / 2; ++cnt, ++pix, --pix1) {
+                pix = check_pix(pix);
+                pix1 = check_pix(pix1);
                 set_clr(pix, clr);
+                set_clr(pix1, clr);
         }
 }
 
 void
 spectrum(int pix, unsigned lum, unsigned width) 
-{
-        unsigned cnt;
-        
-        off();
-        for (cnt = pix; cnt < (pix + width); ++cnt)
-                mk_pix(cnt, lum);
-        strip.show();
-}
-
-void
-spectrum_double_chase(int pix, unsigned lum, unsigned width)
 {
         unsigned cnt;
         int pix1, pix2;
@@ -239,7 +231,10 @@ spectrum_double_chase(int pix, unsigned lum, unsigned width)
 int
 check_pix(int pix)
 {
-        return pix % NUM_LEDS;
+        pix = pix % NUM_LEDS;
+        if (pix < 0)
+                return pix + NUM_LEDS;
+        return pix;
 }
 
 void
