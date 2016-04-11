@@ -254,25 +254,10 @@ triad(int pix, unsigned lum, unsigned width)
 void
 tetrad(int pix, unsigned lum, unsigned width)
 {
-        unsigned cnt;
-
-        for (cnt = 0; cnt < NUM_LEDS; ++cnt)
-                strip.setPixelColor(cnt, OFF);        
-        
-        mk_pix(pix, lum);
-        
-        pix += (NUM_LEDS / 4);
-        pix = check_pix(pix);
-        mk_pix(pix, lum);
-        
-        pix += (NUM_LEDS / 2);
-        pix = check_pix(pix);
-        mk_pix(pix, lum);
-        
-        pix -= (NUM_LEDS / 4);
-        pix = check_pix(pix);
-        mk_pix(pix, lum);
-        
+        mono(pix, lum, width / 4);
+        mono(pix + (NUM_LEDS / 4), lum, width / 4);
+        mono(pix + (NUM_LEDS / 2), lum, width / 4);
+        mono(pix - (NUM_LEDS / 4), lum, width / 4);
 }
 
 void
