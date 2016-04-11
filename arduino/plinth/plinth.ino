@@ -196,11 +196,12 @@ mono(int pix, unsigned lum, unsigned width)
 {
         int cnt;
         unsigned clr[CHANNELS] = {OFF, OFF, OFF};
+        int pix1 = pix;
         
         get_clr(pix, lum, clr);
         
         off();
-        for (cnt = 0; cnt < width; ++cnt, ++pix) {
+        for (cnt = 0; cnt < width / 2; ++cnt, ++pix, --pix1) {
                 set_clr(pix, clr);
         }
 }
