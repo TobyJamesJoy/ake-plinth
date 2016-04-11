@@ -231,43 +231,24 @@ spectrum(int pix, unsigned lum, unsigned width)
 int
 check_pix(int pix)
 {
-        pix = pix % NUM_LEDS;
         if (pix < 0)
                 return pix + NUM_LEDS;
-        return pix;
+        return pix % NUM_LEDS;
 }
 
 void
 diad(int pix, unsigned lum, unsigned width)
 {
-        unsigned cnt;
-        int di = pix + NUM_LEDS / 2;
-
         mono(pix, lum, width / 2);
-        mono(di, lum, width / 2);
-}
-
-void 
-mk_triad(int pix, unsigned lum, unsigned width, unsigned offset) 
-{
-        int pint = pix;
-
-        mk_pix(pix, lum);
-        pint = check_pix(pint + offset);
-        mk_pix(pint, lum);
-        pint = check_pix(pix - offset);
-        mk_pix(pint, lum);
+        mono(pix + (NUM_LEDS / 2), lum, width / 2);
 }
 
 void
 triad(int pix, unsigned lum, unsigned width)
 {
-        unsigned cnt;
-        
-        for (cnt = 0; cnt < NUM_LEDS; ++cnt)
-                strip.setPixelColor(cnt, OFF);        
-
-        mk_triad(pix, lum, width, NUM_LEDS / 3);
+        mono(pix, lum, width / 3);
+        mono(pix + (NUM_LEDS / 3), lum, width / 3);
+        mono(pix - (NUM_LEDS / 3), lum, width / 3);
 }
 
 void
