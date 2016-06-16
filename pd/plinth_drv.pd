@@ -1,0 +1,17 @@
+#N canvas 642 47 636 1012 10;
+#X obj 120 80 hradio 15 1 0 9 empty empty empty 0 -8 0 10 -262144 -1
+-1 2;
+#X obj 101 160 hsl 128 15 0 127 0 0 empty empty empty -2 -8 0 10 -262144
+-1 -1 3400 1;
+#X obj 98 180 s lum;
+#X obj 112 228 hsl 128 15 0 33 0 0 empty empty empty -2 -8 0 10 -262144
+-1 -1 4500 1;
+#X obj 109 248 s pix;
+#X obj 98 289 hsl 128 15 0 127 0 0 empty empty empty -2 -8 0 10 -262144
+-1 -1 0 1;
+#X obj 95 309 s width;
+#X obj 120 108 s rout;
+#X connect 0 0 7 0;
+#X connect 1 0 2 0;
+#X connect 3 0 4 0;
+#X connect 5 0 6 0;
