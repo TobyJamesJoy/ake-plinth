@@ -1,34 +1,9 @@
 #include "LPD8806.h"
 #include "SPI.h"
-
-
-#define BAUD_RATE 115200
-#define CHANNELS 3
-#define CLOCKPIN 3
-#define COLOURS 12
-#define DATAPIN 2
-#define MIDI_MAX 127
-#define NUM_LEDS 34
-#define OFF 0
-#define OUTPIN 13
-#define TIMEOUT 5
+#include "ake_common.h"
+#include "spectra.h"
 
 LPD8806 strip = LPD8806(NUM_LEDS, DATAPIN, CLOCKPIN);
-
-enum colours {
-        R, O, Y, CH, G, GC, C, BC, B, V, M, RM
-};
-
-enum channels {
-        RED, GREEN, BLUE
-};
-
-enum routines {
-        OFFF, MONO, SPECTRUM, DIAD, TRIAD, TETRAD, 
-        OUTSIDER, OUTSIDER_TRIAD, OUTSIDER_TETRAD
-};
-
-unsigned palette[COLOURS];
 
 void 
 setup() 
@@ -37,93 +12,72 @@ setup()
         strip.begin();
         // Update the strip, to start they are all 'off'
         strip.show();
+        
+        def_palette();
 
         pinMode(OUTPIN, OUTPUT);
 
         // opens serial port, sets data rate to 9600 bps
         Serial.begin(BAUD_RATE);
         Serial.setTimeout(TIMEOUT);
-
-        def_palette(palette);
 }
         
 void 
 loop() {
-        unsigned rout, lum, width;
-        int pix;
+        struct rgb *col = (struct rgb*)malloc(sizeof(struct rgb*));
+        int rout, lum, width, pix;
 
-        while (Serial.available() > OFF) {
-                /* 
-                 * look for the next valid integer in the incoming 
-                 * serial stream
-                 */
-                rout = Serial.parseInt(); //color
-                Serial.write(rout);
+        while (1) {
+                if (Serial.available()) {
+                        /* 
+                         * look for the next valid integer in the 
+                         * incoming serial stream
+                         */
+                        rout = Serial.parseInt(); //color
+                        check_int(&rout, OFF, NUM_ROUTS);
                
-                lum = Serial.parseInt(); //luminescence
-                Serial.write(lum);
+                        lum = Serial.parseInt(); //luminescence
+                        check_int(&lum, OFF, MIDI_MAX);
+                        
+                        pix = Serial.parseInt(); //pixel
                 
-                pix = Serial.parseInt(); //pixel
-                Serial.write(pix);
-                
-                
-                width = Serial.parseInt(); //width
-                Serial.write(width);
-                width = get_width(width);
-                off();
-                
-                switch (rout) {
-                case OFF:
-                        off();
-                        break;
-                case MONO:
-                        mono(pix, lum, width);
-                        break;
-                case SPECTRUM:
-                        spectrum(pix, lum, width);
-                        break;
-                case DIAD:
-                        diad(pix, lum, width);
-                        break;
-                case TRIAD:
-                        triad(pix, lum, width);
-                        break;
-                case TETRAD:
-                        tetrad(pix, lum, width);
-                        break;
-                case OUTSIDER:
-                        outsider(pix, lum, width);
-                        break;
-                case OUTSIDER_TRIAD:
-                        outsider_triad(pix, lum, width);
-                        break;
-                case OUTSIDER_TETRAD:
-                        outsider_tetrad(pix, lum, width);
+                        width = Serial.parseInt(); //width
+                        check_int(&width, OFF, MIDI_MAX);
+                        get_width(&width);
                 }
-                
+                off();
+                if (width) {
+                        switch (rout) {
+                        case OFF:
+                                off();
+                                break;
+                        case MONO:
+                                mono(pix, lum, width);
+                                break;
+                        case SPECTRUM:
+                                spectrum(pix, lum, width);
+                                break;
+                        case DIAD:
+                                diad(pix, lum, width);
+                                break;
+                        case TRIAD:
+                                triad(pix, lum, width);
+                                break;
+                        case TETRAD:
+                                tetrad(pix, lum, width);
+                                break;
+                        case OUTSIDER:
+                                outsider(pix, lum, width);
+                                break;
+                        case OUTSIDER_TRIAD:
+                                outsider_triad(pix, lum, width);
+                                break;
+                        case OUTSIDER_TETRAD:
+                                outsider_tetrad(pix, lum, width);
+                        }
+                }
                 strip.show();
-
         }
-}
-
-void
-def_palette(unsigned palette[COLOURS])
-{
-        unsigned i;
-        for (i = 1; i < COLOURS; ++i) 
-	        palette[i] = (NUM_LEDS / COLOURS) * i;
-        palette[0] = 0;
-}
-
-unsigned
-get_width(unsigned width)
-{
-        double unit = (double)NUM_LEDS / (double)MIDI_MAX;
-        width = (unsigned)(unit * width);
-        if (width > 0)
-                return width;
-        else
-                return 1;
 }
 
 void
@@ -136,209 +90,10 @@ off(void)
 }
 
 void
-set_clr(int pix, unsigned clr[CHANNELS])
+set_pix(struct rgb *col, int pix)
 {
-        strip.setPixelColor(pix, strip.Color(clr[RED], clr[GREEN], clr[BLUE]));
-}
-
-void get_clr(int pix, unsigned lum, unsigned clr[CHANNELS])
-{          
-  
-        if (pix < palette[O]) {
-                clr[RED] = lum;
-        } else if (pix < palette[Y]) {
-                clr[RED] = lum;
-                clr[GREEN] = lum / 2;
-        } else if (pix < palette[CH]) {
-                clr[RED] = lum;
-                clr[GREEN] = lum;
-        } else if (pix < palette[G]) {
-                clr[RED] = lum / 2;
-                clr[GREEN] = lum;
-        } else if (pix < palette[GC]) {
-                clr[GREEN] = lum;
-        } else if (pix < palette[C]) {
-                clr[GREEN] = lum;
-                clr[BLUE] = lum / 2;
-        } else if (pix < palette[BC]) {
-                clr[GREEN] = lum;
-                clr[BLUE] = lum;
-        } else if (pix < palette[B]) {
-                clr[GREEN] = lum / 2;
-                clr[BLUE] = lum;
-        } else if (pix < palette[V]) {
-                clr[BLUE] = lum;
-        } else if (pix < palette[M]) {
-                clr[RED] = lum / 2;
-                clr[BLUE] = lum;
-        } else if (pix < palette[RM]) {
-                clr[RED] = lum;
-                clr[BLUE] = lum;
-        } else {
-                clr[RED] = lum;
-                clr[BLUE] = lum / 2;
-        }
-}
-
-void
-mk_pix(int pix, unsigned lum)
-{
-        unsigned clr[CHANNELS] = {OFF, OFF, OFF};
- 
-        pix = check_pix(pix);       
-        get_clr(pix, lum, clr);
-        set_clr(pix, clr);        
-}
-
-void
-mono(int pix, unsigned lum, unsigned width)
-{
-        int cnt;
-        unsigned clr[CHANNELS] = {OFF, OFF, OFF};
-        pix = check_pix(pix);
-        int pix1 = pix;
+        strip.setPixelColor(pix, strip.Color(col->r, col->g, col->b));
         
-        get_clr(pix, lum, clr);
-        
-        
-        set_clr(pix, clr);
-        
-        for (cnt = 0; cnt <= width / 2; ++cnt, ++pix, --pix1) {
-                pix = check_pix(pix);
-                pix1 = check_pix(pix1);
-                set_clr(pix, clr);
-                set_clr(pix1, clr);
-        }
 }
 
-void
-spectrum(int pix, unsigned lum, unsigned width) 
-{
-        unsigned cnt;
-        int pix1, pix2;
-        
-        
-        pix1 = pix;
-        pix2 = pix1;
 
-        
-        for (cnt = 0; cnt < width / 2; ++cnt, ++pix1, --pix2) {
-                mk_pix(pix1, lum);
-                mk_pix(pix2, lum);
-        }
-}
-
-int
-check_pix(int pix)
-{
-        if (pix < 0)
-                return pix + NUM_LEDS;
-        return pix % NUM_LEDS;
-}
-
-void
-diad(int pix, unsigned lum, unsigned width)
-{
-        mono(pix, lum, width / 2);
-        mono(pix + (NUM_LEDS / 2), lum, width / 2);
-}
-
-void
-triad(int pix, unsigned lum, unsigned width)
-{
-        mono(pix, lum, width / 3);
-        mono(pix + (NUM_LEDS / 3), lum, width / 3);
-        mono(pix - (NUM_LEDS / 3), lum, width / 3);
-}
-
-void
-tetrad(int pix, unsigned lum, unsigned width)
-{
-        mono(pix, lum, width / 4);
-        mono(pix + (NUM_LEDS / 4), lum, width / 4);
-        mono(pix + (NUM_LEDS / 2), lum, width / 4);
-        mono(pix - (NUM_LEDS / 4), lum, width / 4);
-}
-
-void
-outsider(int pix, unsigned lum, unsigned width)
-{
-          unsigned cnt, out;
-          unsigned in_clr[CHANNELS] = {OFF, OFF, OFF};
-          unsigned out_clr[CHANNELS] = {OFF, OFF, OFF};
-          
-          mono(pix, lum / 8, MIDI_MAX);
-          
-          out = check_pix(pix + NUM_LEDS / 2);
-          get_clr(out, lum, out_clr);
-                    
-          out = random(NUM_LEDS);
-          strip.setPixelColor(out, out_clr[RED], out_clr[GREEN], out_clr[BLUE]);         
-}
-
-void
-outsider_triad(int pix, unsigned lum, unsigned width)
-{
-          int out0, out1;
-          unsigned cnt;
-          unsigned in_clr[CHANNELS] = {OFF, OFF, OFF};
-          unsigned out_clr0[CHANNELS] = {OFF, OFF, OFF};
-          unsigned out_clr1[CHANNELS] = {OFF, OFF, OFF};
-          
-          mono(pix, lum / 8, MIDI_MAX);
-          
-          out0 = check_pix(pix + (NUM_LEDS / 3));
-          get_clr(out0, lum, out_clr0);
-          
-          out1 = check_pix(pix - (NUM_LEDS / 3));
-          get_clr(out1, lum, out_clr1);
-          
-          out0 = random(NUM_LEDS);
-          
-          do {
-                  out1 = random(NUM_LEDS);
-          } while (out1 == out0);
-          
-          strip.setPixelColor(out0, out_clr0[RED], out_clr0[GREEN], out_clr0[BLUE]);         
-          strip.setPixelColor(out1, out_clr1[RED], out_clr1[GREEN], out_clr1[BLUE]);         
-}
-
-void
-outsider_tetrad(unsigned pix, unsigned lum, unsigned width)
-{
-          int out0, out1, out2;
-          unsigned cnt;
-          unsigned in_clr[CHANNELS] = {OFF, OFF, OFF};
-          unsigned out_clr0[CHANNELS] = {OFF, OFF, OFF};
-          unsigned out_clr1[CHANNELS] = {OFF, OFF, OFF};
-          unsigned out_clr2[CHANNELS] = {OFF, OFF, OFF};
-          
-          
-          mono(pix, lum / 8, MIDI_MAX);
-          
-          out0 = pix + (NUM_LEDS / 4);
-          out0 = check_pix(out0);
-          get_clr(out0, lum, out_clr0);
-          
-          out1 = pix + (NUM_LEDS / 2);
-          out1 = check_pix(out1);
-          get_clr(out1, lum, out_clr1);
-          
-          out2 = pix + (NUM_LEDS / 4);
-          out2 = check_pix(out2);
-          get_clr(out2, lum, out_clr2);
-          
-          out0 = random(NUM_LEDS);
-          
-          do {
-                  out1 = random(NUM_LEDS);
-          } while (out1 == out0);
-          
-          do {
-                  out2 = random(NUM_LEDS);
-          } while (out2 == out0 || out2 == out1);
-          
-          strip.setPixelColor(out0, out_clr0[RED], out_clr0[GREEN], out_clr0[BLUE]);         
-          strip.setPixelColor(out1, out_clr1[RED], out_clr1[GREEN], out_clr1[BLUE]);         
-          strip.setPixelColor(out2, out_clr2[RED], out_clr2[GREEN], out_clr2[BLUE]);         
-}

@@ -23,6 +23,7 @@ setup()
 void 
 loop() {
         struct rgb *col = (rgb *)malloc(sizeof(rgb));
+        init_col(col);
         int cnt, pix, width;
         
         while (1) {
