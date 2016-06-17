@@ -1,0 +1,14 @@
+#!/bin/sh
+
+## Script to propagate changes made in ../simple/plinth.ino ##
+
+PLINTH="spectra.cpp spectra.h"
+COMMON="ake_common.cpp ake_common.h"
+ALL="$PLINTH $COMMON"
+
+echo "Copying common files..."
+for f in $COMMON
+do
+	cp -v ../simple/$f ../ake_common/
+	cp -v ../simple/$f ../plinth/
+done
