@@ -1,0 +1,16 @@
+#N canvas 1414 948 517 372 10;
+#X obj 61 6 inlet;
+#X obj 175 229 s vol3-\$1;
+#X obj 148 275 s vol2-\$1;
+#X floatatom 71 151 5 0 0 0 - - -;
+#X obj 61 37 moses 8;
+#X obj 61 249 pancalc 0 7;
+#X obj 107 181 pancalc 8 17;
+#X obj 134 312 s vol4-\$1;
+#X connect 0 0 4 0;
+#X connect 4 0 3 0;
+#X connect 4 0 5 0;
+#X connect 4 1 6 0;
+#X connect 5 1 2 0;
+#X connect 5 1 7 0;
+#X connect 6 1 1 0;

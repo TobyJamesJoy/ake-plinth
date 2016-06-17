@@ -1,10 +1,11 @@
 # ake-leds
-## Object 2
+## Object 3
 
-These sources are what I wrote for *A Series of Small Wire Objects (Many of them Uninteresting): Object 2*
+These sources are what I wrote for *A Series of Small Wire Objects (Many of them Uninteresting): Object 3*
 
-Exhibited in late 2014 as part of *Experimenta: Recharge (6th Bienalle of Media Art)*
+Exhibited in 2015 as part of *The Unrealised Axiom*
 
-Sound design was a collaboration with Darrin Verhagen
+This was a solo work, in quadraphonic sound. The pd patches were essentially 
+rewritten from scratch.
 
-pd patches modified from Stuart McFarlane's original work for *Object 1*
+[Documentation](http://tbrodel.me/installation/object3/)

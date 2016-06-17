@@ -1,0 +1,7 @@
+#N canvas 621 467 450 300 10;
+#X obj 61 128 outlet~;
+#X obj 197 131 outlet~;
+#X obj 194 41 osc~ 100;
+#X obj 59 46 phasor~ 200;
+#X connect 2 0 1 0;
+#X connect 3 0 0 0;
