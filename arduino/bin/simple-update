@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## Script to propagate changes made in ../simple/plinth.ino ##
+## Script to propagate changes made in ../simple/simple.ino ##
 
 PLINTH="spectra.cpp spectra.h"
 COMMON="ake_common.cpp ake_common.h"
