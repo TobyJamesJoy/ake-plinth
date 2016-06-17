@@ -6,6 +6,11 @@ PLINTH="spectra.cpp spectra.h"
 COMMON="ake_common.cpp ake_common.h"
 ALL="$PLINTH $COMMON"
 
+SCRIPT=$(readlink -f "$0")
+SCRIPT_PATH=$(dirname $SCRIPT)
+
+cd $SCRIPT_PATH
+
 echo "Copying all files..." 
 for f in $ALL 
 do 
