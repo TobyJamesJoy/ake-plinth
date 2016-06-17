@@ -8,3 +8,5 @@ Exhibited in late 2014 as part of *Experimenta: Recharge (6th Bienalle of Media 
 Sound design was a collaboration with Darrin Verhagen
 
 pd patches modified from Stuart McFarlane's original work for *Object 1*
+
+[Documentation](http://tbrodel.me/installation/object2/)
