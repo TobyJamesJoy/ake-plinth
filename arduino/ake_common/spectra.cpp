@@ -88,13 +88,11 @@ mono(int pix, int lum, int width)
 void
 outsider(int pix, int lum, int width)
 {
-          int cnt, full, out;
+          int cnt, out;
           struct rgb *out_col = (struct rgb *)malloc(sizeof(struct rgb *));
           init_col(out_col);
           
-          full = MIDI_MAX;
-          get_width(&full);
-          mono(pix, lum / 8, full);
+          mono(pix, lum / 8, NUM_LEDS - 1);
           
           out = pix + (NUM_LEDS / 2);
           check_int(&out, OFF, (NUM_LEDS - 1));
@@ -119,7 +117,7 @@ outsider_tetrad(int pix, int lum, int width)
           init_col(out_col1);
           init_col(out_col2);
           
-          mono(pix, lum / 8, MIDI_MAX);
+          mono(pix, lum / 8, NUM_LEDS - 1);
           
           out0 = pix + (NUM_LEDS / 4);
           check_int(&out0, OFF, (NUM_LEDS - 1));
@@ -166,7 +164,7 @@ outsider_triad(int pix, int lum, int width)
           init_col(out_col0);
           init_col(out_col1);
           
-          mono(pix, lum / 8, MIDI_MAX);
+          mono(pix, lum / 8, NUM_LEDS - 1);
           
           out0 = pix + (NUM_LEDS / 3);
           check_int(&out0, OFF, (NUM_LEDS - 1));
