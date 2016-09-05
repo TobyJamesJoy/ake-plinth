@@ -22,7 +22,10 @@ void
 get_width(int *width)
 {
         double unit;
-        
+
+        if (*width == 1)
+                return;
+                
         if (*width == MIDI_MAX) {
                 *width = NUM_LEDS;
                 return;
@@ -52,14 +55,20 @@ set_col(struct rgb *col, int pix, int width)
         unsigned cnt;
         int pix1;
         
-        check_int(&pix, OFF, NUM_LEDS);
+                
+        /* don't bother with the rest if width == 1 */
+        if (width == 1) {
+                check_int(&pix, OFF, NUM_LEDS);
+                set_pix(col, pix);
+                return;
+        }
+                
         pix1 = pix;
-        set_pix(col, pix);
-        
-        for (cnt = 0; cnt <= ((width / 2) + 1); ++cnt, ++pix, --pix1) {
+       
+        for (cnt = 1; cnt <= width; ++cnt, ++pix, --pix1) {
                 check_int(&pix, OFF, NUM_LEDS);
                 check_int(&pix1, OFF, NUM_LEDS);
                 set_pix(col, pix);
-                set_pix(col, pix1); 
+                set_pix(col, pix1);
         }
 }
