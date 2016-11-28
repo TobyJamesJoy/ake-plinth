@@ -38,7 +38,7 @@ get_width(int *width)
 
         /* don't bother if width is zero */
         if (*width) {
-                unit = (double)NUM_LEDS / (double)(MIDI_MAX);
+                unit = (double)NUM_LEDS / (double)MIDI_MAX;
                 *width = (int)(unit * *width);
                 /* if given non-zero width make the minimum == 1 */
                 if (*width == 0)
