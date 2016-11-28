@@ -1,21 +1,26 @@
 #include "ake_common.h"
 
 void
-check_int(int *i, int minimum, int maximum)
+check_int(int *i, int minimum, int maximum, int mod_overflow)
 {
-#if MOD_OVERFLOW
-        while (*i < minimum)
-                *i += maximum;
-        *i = *i % maximum;
-#else         
-        if (*i < minimum) {
-                *i = minimum;
-                return;
+        /*
+         * ``mod_overflow" determines how to handle 
+         * over/underflow in check_int(): 
+         * 0: crunch to min/max 
+         * 1: modulo
+         */
+        if (mod_overflow) {
+                while (*i < minimum)
+                        *i += maximum;
+                *i = *i % maximum;
+        } else {
+                if (*i < minimum) {
+                        *i = minimum;
+                        return;
+                }
+                if (*i > maximum)
+                        *i = maximum;
         }
-        
-        if (*i > maximum)
-                *i = maximum;
-#endif
 }
 
 void
@@ -55,7 +60,7 @@ set_col(struct rgb *col, int pix, int width)
         unsigned cnt;
         int pix1;
         
-        check_int(&pix, OFF, NUM_LEDS); 
+        check_int(&pix, OFF, NUM_LEDS, 0); 
         set_pix(col, pix) 
 
         /* don't bother with the rest if width == 1 */
@@ -67,8 +72,8 @@ set_col(struct rgb *col, int pix, int width)
 	--pix1;
        
         for (cnt = 0; cnt < width / 2; ++cnt, ++pix, --pix1) {
-                check_int(&pix, OFF, NUM_LEDS);
-                check_int(&pix1, OFF, NUM_LEDS);
+                check_int(&pix, OFF, NUM_LEDS, 0);
+                check_int(&pix1, OFF, NUM_LEDS, 0);
                 set_pix(col, pix);
                 set_pix(col, pix1);
         }

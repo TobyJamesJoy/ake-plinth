@@ -33,19 +33,19 @@ loop() {
                  */
                 if (Serial.available()) {
                         col->r = Serial.parseInt(); //red
-                        check_int(&col->r, OFF, MIDI_MAX);
+                        check_int(&col->r, OFF, MIDI_MAX, 0);
                         
                         col->g = Serial.parseInt(); //green
-                        check_int(&col->g, OFF, MIDI_MAX);
+                        check_int(&col->g, OFF, MIDI_MAX, 0);
                         
                         col->b = Serial.parseInt(); //blue
-                        check_int(&col->b, OFF, MIDI_MAX);
+                        check_int(&col->b, OFF, MIDI_MAX, 0);
                         
                         pix = Serial.parseInt(); //pixel
-                        check_int(&pix, OFF, (NUM_LEDS - 1));
+                        check_int(&pix, OFF, (NUM_LEDS - 1), 0);
                         
                         width = Serial.parseInt(); //width
-                        check_int(&width, OFF, MIDI_MAX);
+                        check_int(&width, OFF, MIDI_MAX, 0);
                         get_width(&width);
                 }
                 
