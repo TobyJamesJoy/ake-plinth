@@ -14,7 +14,6 @@ setup()
         // Update the strip, to start they are all 'off'
         strip.show();
 
-        pinMode(OUTPIN, OUTPUT);
         // opens serial port, sets data rate to 9600 bps
         Serial.begin(BAUD_RATE);
         Serial.setTimeout(TIMEOUT);

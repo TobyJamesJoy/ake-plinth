@@ -7,7 +7,6 @@
 #define MIDI_MAX 128
 #define NUM_LEDS 34
 #define OFF 0
-#define OUTPIN 13
 #define TIMEOUT 5
 
 typedef struct rgb {
