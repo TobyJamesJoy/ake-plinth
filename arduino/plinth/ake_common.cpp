@@ -55,17 +55,18 @@ set_col(struct rgb *col, int pix, int width)
         unsigned cnt;
         int pix1;
         
-                
+        check_int(&pix, OFF, NUM_LEDS); 
+        set_pix(col, pix) 
+
         /* don't bother with the rest if width == 1 */
-        if (width == 1) {
-                check_int(&pix, OFF, NUM_LEDS);
-                set_pix(col, pix);
+        if (width == 1)
                 return;
-        }
                 
         pix1 = pix;
+	++pix;
+	--pix1;
        
-        for (cnt = 1; cnt <= width; ++cnt, ++pix, --pix1) {
+        for (cnt = 0; cnt < width / 2; ++cnt, ++pix, --pix1) {
                 check_int(&pix, OFF, NUM_LEDS);
                 check_int(&pix1, OFF, NUM_LEDS);
                 set_pix(col, pix);
